@@ -9,6 +9,7 @@
 /usr/bin/sudo ip tuntap add dev tap0 mode tap
 /usr/bin/sudo ip addr add 192.168.2.1/24 dev tap0
 /usr/bin/sudo ip link set dev tap0 up
+/usr/bin/sudo /etc/init.d/inetutils-inetd restart
 
 cd /home/genera
 

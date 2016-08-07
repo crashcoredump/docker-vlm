@@ -4,10 +4,7 @@ MAINTAINER Seth Morabito <seth@loomcom.com>
 EXPOSE 5901
 
 RUN apt-get update && \
-    apt-get install -y tightvncserver && \
-    apt-get install -y mwm && \
-    apt-get install -y sudo && \
-    apt-get install -y inetutils-inetd
+    apt-get install -y tightvncserver mwm sudo inetutils-inetd xterm telnet
 
 RUN mkdir -p /home/genera && \
     mkdir -p /home/genera/.vnc
