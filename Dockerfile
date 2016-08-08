@@ -1,13 +1,13 @@
 FROM ubuntu:16.04
-MAINTAINER Seth Morabito <seth@loomcom.com>
+MAINTAINER Seth Morabito <web@loomcom.com>
 
 EXPOSE 5901
 
 ENV TERM vt100
 
 RUN apt-get update && \
-    apt-get install -y tightvncserver mwm sudo \
-    inetutils-inetd xterm telnet nfs-kernel-server
+    apt-get install -y tightvncserver clfswm sudo \
+    inetutils-inetd xterm telnet nfs-kernel-server 
 
 RUN mkdir -p /home/genera && \
     mkdir -p /home/genera/.vnc

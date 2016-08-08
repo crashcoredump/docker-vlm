@@ -19,6 +19,9 @@
 
 cd /home/genera
 
+rm -f /tmp/.X1-lock
+rm -rf /tmp/.X11-unix
+
 tightvncserver &
 
 /home/genera/genera 2>&1
