@@ -19,7 +19,7 @@ COPY dot-VLM /home/genera/.VLM
 COPY dist.vlod /home/genera/dist.vlod
 COPY VLM_debugger /home/genera/VLM_debugger
 COPY Xsession /home/genera/.Xsession
-COPY var_lib_symbolics.tar.gz /var/lib
+COPY symbolics.tar.gz /var/lib
 COPY exports /etc/exports
 
 RUN export uid=1000 gid=1000 && \
@@ -34,7 +34,7 @@ RUN export uid=1000 gid=1000 && \
     echo "time dgram udp wait root internal" >> /etc/inetd.conf && \
     echo "192.168.2.1	genera-vlm" >> /etc/hosts && \
     echo "192.168.2.2	genera" >> /etc/hosts && \
-    cd /var/lib && tar xvf var_lib_symbolics.tar.gz && \
+    cd /var/lib && tar xvf symbolics.tar.gz && \
     cd /home/genera && \
     echo "genera" | vncpasswd -f > /home/genera/.vnc/passwd && \
     chmod 0600 /home/genera/.vnc/passwd && \
