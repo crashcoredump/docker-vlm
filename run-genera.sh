@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Ensure the hosts entries exist
+
+if ! grep "192.168.2.1" /etc/hosts ; then
+    sudo sh -c 'echo "192.168.2.1 genera-vlm" >> /etc/hosts'
+fi
+
+if ! grep "192.168.2.2" /etc/hosts ; then
+    sudo sh -c 'echo "192.168.2.2 genera" >> /etc/hosts'
+fi
+
 [ -d /dev/net ] || /usr/bin/sudo mkdir -p /dev/net
 
 [ -c /dev/net/tun ] || /usr/bin/sudo mknod /dev/net/tun c 10 200

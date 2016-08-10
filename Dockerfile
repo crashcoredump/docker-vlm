@@ -32,8 +32,6 @@ RUN export uid=1000 gid=1000 && \
     echo "time  stream tcp nowait root internal" >> /etc/inetd.conf && \
     echo "daytime dgram udp wait root internal" >> /etc/inetd.conf && \
     echo "time dgram udp wait root internal" >> /etc/inetd.conf && \
-    echo "192.168.2.1	genera-vlm" >> /etc/hosts && \
-    echo "192.168.2.2	genera" >> /etc/hosts && \
     cd /var/lib && tar xvf symbolics.tar.gz && \
     cd /home/genera && \
     echo "genera" | vncpasswd -f > /home/genera/.vnc/passwd && \
