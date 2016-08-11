@@ -18,12 +18,14 @@ command to map to the correct directory.
 
 # To Run
 
-    docker create --name docker-vlm 
-
     docker run -ti --privileged \
         --env="DISPLAY" \
         --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
         -P docker-vlm
+
+This uses a hack to get X11 working. It maps the X11 UNIX domain
+socket directory into the Docker machine, allowing it to be shared by
+both your main display and by genera.
 
 # Notes
 
