@@ -1,9 +1,6 @@
 FROM ubuntu:16.04
 MAINTAINER Seth Morabito <web@loomcom.com>
 
-EXPOSE 5901
-EXPOSE 6000-6063
-
 ENV TERM vt100
 
 RUN apt-get update && \
@@ -16,7 +13,7 @@ RUN mkdir -p /home/genera && \
 COPY genera /home/genera
 COPY run-genera.sh /home/genera
 COPY dot-VLM /home/genera/.VLM
-COPY dist.vlod /home/genera/dist.vlod
+COPY Genera-8-5-A.vlod /home/genera/Genera-8-5-A.vlod
 COPY VLM_debugger /home/genera/VLM_debugger
 COPY Xsession /home/genera/.Xsession
 COPY symbolics.tar.gz /var/lib

@@ -1,2 +1,1 @@
-/home/genera 192.168.2.2(rw,sync,fsid=0,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
-/var/lib/symbolics 192.168.2.2(rw,sync,fsid=1,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+/ 192.168.2.2(rw,sync,fsid=0,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
