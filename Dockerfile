@@ -22,6 +22,8 @@ COPY Xsession /home/genera/.Xsession
 COPY symbolics.tar.gz /var/lib
 COPY exports /etc/exports
 
+RUN pwunconv
+
 RUN export uid=1000 gid=1000 && \
     mkdir -p /etc/sudoers.d && \
     echo "genera:x:${uid}:${gid}:Genera,,,:/home/genera:/bin/bash" >> /etc/passwd && \
