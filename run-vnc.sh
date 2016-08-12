@@ -46,4 +46,4 @@ echo "*                                                                         
 echo "***************************************************************************"
 echo
 
-tightvncserver -geometry 1300x1080 && /home/genera/bin/genera 2>&1
+tightvncserver -geometry 1300x1080 && /home/genera/bin/genera $@ 2>&1

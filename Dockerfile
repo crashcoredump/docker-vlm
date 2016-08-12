@@ -1,22 +1,24 @@
-FROM ubuntu:16.04
+FROM ubuntu:14.04
 MAINTAINER Seth Morabito <web@loomcom.com>
 
 ENV TERM vt100
 
-RUN apt-get update && \
-    apt-get install -y tightvncserver mwm sudo \
+RUN apt-get update
+
+RUN apt-get install -y tightvncserver mwm sudo \
     curl inetutils-inetd xterm telnet nfs-kernel-server
 
 RUN mkdir -p /home/genera && \
     mkdir -p /home/genera/.vnc &&\
-    mkdir -p /home/genera/bin
+    mkdir -p /home/genera/bin && \
+    mkdir -p /home/genera/worlds
 
 COPY genera /home/genera/bin
 COPY run.sh /home/genera
 COPY run-vnc.sh /home/genera
 COPY lispm-init.lisp /home/genera
 COPY dot-VLM /home/genera/.VLM
-COPY Genera-8-5-A.vlod /home/genera/Genera-8-5-A.vlod
+COPY Genera-8-5-A.vlod /home/genera/worlds/Genera-8-5-A.vlod
 COPY VLM_debugger /home/genera/VLM_debugger
 COPY Xsession /home/genera/.Xsession
 COPY symbolics.tar.gz /var/lib
@@ -43,8 +45,7 @@ RUN export uid=1000 gid=1000 && \
 
 USER genera
 
-ENV DISPLAY localhost:1.0
 ENV HOME /home/genera
 ENV USER genera
 
-CMD /home/genera/run.sh
+ENTRYPOINT /home/genera/run.sh

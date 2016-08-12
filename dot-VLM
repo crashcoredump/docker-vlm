@@ -11,7 +11,7 @@ genera.trace: no
 *coldLoad.foreground: black
 *coldLoad.background: white
 
-genera.world: Genera-8-5-A.vlod
+genera.world: /home/genera/worlds/Genera-8-5-A.vlod
 genera.spy: no
 
 genera.debugger: VLM_debugger
