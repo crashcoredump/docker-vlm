@@ -107,4 +107,4 @@ fi
 
 ### Start the container
 
-docker start $CONTAINER
+docker start -a $CONTAINER
