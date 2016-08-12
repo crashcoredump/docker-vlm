@@ -8,24 +8,34 @@ At the moment, this ONLY runs on Unix hosts, and does not support
 Docker or Docker-Machine running on OS X. I'm still working on getting
 that to work.
 
-Note, also, that this procedure REQUIRES that your X11 sockets be
-under /tmp/.X11-unix. If it's not, you'll need to edit the run
-command to map to the correct directory.
-
 # To Build
 
     docker build -t docker-vlm .
 
 # To Run
 
-    docker run -ti --privileged \
-        --env="DISPLAY" \
-        --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-        -P docker-vlm
+To run the VLM under Docker, please use the included `dvlm`
+utility.
 
-This uses a hack to get X11 working. It maps the X11 UNIX domain
+For a summary of help, type `dvlm -h`.
+
+In short, dvlm is a wrapper around docker that knows how to build and
+run new containers with the appropriate settings. It hides some of
+Docker's 
+
+`dvlm` uses a hack to get X11 working. It maps the X11 UNIX domain
 socket directory into the Docker machine, allowing it to be shared by
-both your main display and by genera.
+both your main display and by genera. If you do not have the X11
+socket directory `/tmp/.X11-unix`, this hack will not work, and `dvlm`
+will refuse to run.
+
+The two main options are available when creating a new container:
+
+  '-g', which can point the VLM at a directorhy containing a compiled
+  `genera` binary on the local host, 
+
+  '-s', which can point the VLM at a directory containing `sys.sct`
+  on the local host.
 
 # Notes
 

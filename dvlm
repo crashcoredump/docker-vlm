@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+#
+# -*- mode: shell; -*-
+#
+################################################################
+#
+# This script is meant to be a wrapper around running
+# Symbolics VLM under Docker.
+#
+# Optional Arguments:
+#
+#   -i <image>     Use the specified image. If not set, the
+#                  default name 'docker-vlm' will be used.
+#
+#   -c <container> Run the named container. If not set, the
+#                  default name 'docker-vlm' will be used.
+#
+#   -s <dir>       Set LOCAL directory under which sys.sct
+#                  can be found. e.g. "-s /var/lib/symbolics"
+#                  If this argument is omitted, the default
+#                  bundled sys.sct files will be used.
+#
+#   -g <dir>       Set the LOCAL directory under which the X86-64
+#                  binary "genera" can be found. e.g.
+#                  "-g /path/to/dir/". If this argument is omitted,
+#                  the default bundled executable will be used
+#                  instead.
+#
+################################################################
+
+IMAGE="docker-vlm"
+CONTAINER="docker-vlm"
+SYSSCT=
+GENERA=
+DOPTS=
+
+while getopts ":i:s:g:c:h" opt; do
+    case $opt in
+        i)
+            echo "Will use Docker image $OPTARG"
+            IMAGE=$OPTARG
+            ;;
+        c)
+            echo "Will use Docker container $OPTARG"
+            CONTAINER=$OPTARG
+            ;;
+        s)
+            echo "Will use directory $OPTARG to find sys.sct"
+            DOPTS="$DOPTS -v $OPTARG:/var/lib/symbolics:rw"
+            ;;
+        g)
+            echo "Will use directory $OPTARG to find genera binary"
+            DOPTS="$DOPTS -v $OPTARG:/home/genera/bin:rw"
+            GENERA=$OPTARG
+            ;;
+        h)
+            echo "Usage: dvlm [-i <image>] [-c <container>] [-s <dir>] [-g <dir>]"
+            echo ""
+            echo "-i <image>     Use the specified image. If not set, the default name"
+            echo "               'docker-vlm' will be used."
+            echo ""
+            echo "-c <container> Run the named container. If not set, the default name"
+            echo "               'docker-vlm' will be used."
+            echo ""
+            echo "-s <dir>       Set LOCAL directory under which sys.sct can be found."
+            echo "               e.g. '-s /var/lib/symbolics'. If this argument is"
+            echo "               omitted, the default bundled sys.sct files will be used."
+            echo ""
+            echo "-g <dir>       Set the LOCAL directory under which the X86-64 binary"
+            echo "               'genera' can be found. e.g. '-g /path/to/dir'. If this"
+            echo "               argument is omitted, the default bundled executable will"
+            echo "               be used instead."
+            exit 1
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument" >&2
+            ;;
+    esac
+done
+
+#### Verify that /tmp/.X11-unix exists.
+
+if [ ! -d /tmp/.X11-unix ] ; then
+    echo "*** ERROR: Can't find X11 socket directory /tmp/.X11-unix" >&2
+    exit 1
+fi
+
+#### Verify that a container for the image exists
+
+if docker ps -a --format="{{.Image}}" | grep -q $IMAGE  ; then
+    echo "Found existing container for docker image ${IMAGE}"
+
+    if [ ! -z "$DOPTS" ] ; then
+        echo "WARNING: Ignoring -g and -s options, container already exists." >&2
+    fi
+else
+    echo "Creating docker container ${CONTAINER}"
+    
+    docker create -ti --privileged -P $DOPTS \
+           -e "DISPLAY" \
+           -v "/tmp/.X11-unix/:/tmp/.X11-unix/:rw" \
+           --name $CONTAINER $IMAGE
+fi
+
+### Start the container
+
+docker start $CONTAINER

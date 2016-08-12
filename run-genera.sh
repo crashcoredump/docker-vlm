@@ -29,4 +29,4 @@ sudo exportfs -avr
 
 cd /home/genera
 
-/home/genera/genera 2>&1
+/home/genera/bin/genera 2>&1
