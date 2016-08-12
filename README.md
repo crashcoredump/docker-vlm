@@ -36,9 +36,9 @@ The two main options are available when creating a new container:
 - `-s`, which can point the VLM at a directory containing `sys.sct`
   on the local host.
 
-Note that these options only apply when running dvlm when you do not
-have a container yet! On subsequent runs they will be ignored (because
-they only make sense at container creation time)
+Note that these options only apply when you do not have a container
+yet! On subsequent runs they will be ignored (because they only make
+sense at container creation time)
 
 # Notes About the Install
 
