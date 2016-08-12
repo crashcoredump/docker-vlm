@@ -30,10 +30,10 @@ will refuse to run.
 
 The two main options are available when creating a new container:
 
-  '-g', which can point the VLM at a directorhy containing a compiled
+- `-g`, which can point the VLM at a directorhy containing a compiled
   `genera` binary on the local host, 
 
-  '-s', which can point the VLM at a directory containing `sys.sct`
+- `-s`, which can point the VLM at a directory containing `sys.sct`
   on the local host.
 
 Note that these options only apply when running dvlm when you do not
@@ -45,8 +45,8 @@ they only make sense at container creation time)
 - The Docker image includes a Genera 8.5 world with a pre-defined Site
   named "Docker".
 
-- There is only one UNIX user, named 'genera'. You may log into Genera
-  with the password 'xyzzy'. This password is hard-coded. If you want
+- There is only one UNIX user, named `genera`. You may log into Genera
+  with the password `xyzzy`. This password is hard-coded. If you want
   to change it, edit the definition of
   `RPC::USERNAME-AND-PASSWORD-VALID-P` in `nfs/authentication.lisp`
 
