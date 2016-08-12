@@ -14,8 +14,7 @@ that to work.
 
 # To Run
 
-To run the VLM under Docker, please use the included `dvlm`
-utility.
+To run the VLM under Docker, please use the included `dvlm` utility.
 
 For a summary of help, type `dvlm -h`.
 
@@ -37,15 +36,24 @@ The two main options are available when creating a new container:
   '-s', which can point the VLM at a directory containing `sys.sct`
   on the local host.
 
-# Notes
+Note that these options only apply when running dvlm when you do not
+have a container yet! On subsequent runs they will be ignored (because
+they only make sense at container creation time)
 
-The Docker image includes a Genera 8.5 world with a pre-defined Site
-named "Docker".
+# Notes About the Install
 
-There is only one UNIX user, named 'genera'. You may log into Genera
-with the password 'xyzzy'. This password is hard-coded. If you want to
-change it, edit the definition of `RPC::USERNAME-AND-PASSWORD-VALID-P`
-in `nfs/authentication.lisp`
+- The Docker image includes a Genera 8.5 world with a pre-defined Site
+  named "Docker".
 
-NFS shares the entire UNIX root file system, as is normal with Open
-Genera.
+- There is only one UNIX user, named 'genera'. You may log into Genera
+  with the password 'xyzzy'. This password is hard-coded. If you want
+  to change it, edit the definition of
+  `RPC::USERNAME-AND-PASSWORD-VALID-P` in `nfs/authentication.lisp`
+
+- The docker VLM virtual machine is named GENERA and has IP address
+  192.168.2.2.
+
+- The docker host is named GENERA-VLM and has IP address 192.168.2.1.
+
+- NFS shares the entire UNIX root file system, as is normal with Open
+  Genera.
