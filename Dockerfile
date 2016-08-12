@@ -14,6 +14,7 @@ RUN mkdir -p /home/genera && \
 COPY genera /home/genera/bin
 COPY run.sh /home/genera
 COPY run-vnc.sh /home/genera
+COPY lispm-init.lisp /home/genera
 COPY dot-VLM /home/genera/.VLM
 COPY Genera-8-5-A.vlod /home/genera/Genera-8-5-A.vlod
 COPY VLM_debugger /home/genera/VLM_debugger
