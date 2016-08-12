@@ -33,6 +33,18 @@ CONTAINER="docker-vlm"
 SYSSCT=
 GENERA=
 DOPTS=
+OS='unknown'
+
+unamestr=`uname`
+
+if [[ "$unamestr" == 'Linux' ]] ; then
+    platform='linux'
+elif [[ "$unamestr" == 'Darwin' ]] ; then
+    platform='darwin'
+else
+    echo "Unknown platform '$unamestr'. Can't run." >&2
+    exit 1
+fi
 
 while getopts ":i:s:g:c:h" opt; do
     case $opt in
@@ -83,9 +95,11 @@ done
 
 #### Verify that /tmp/.X11-unix exists.
 
-if [ ! -d /tmp/.X11-unix ] ; then
-    echo "*** ERROR: Can't find X11 socket directory /tmp/.X11-unix" >&2
-    exit 1
+if [[ $platform == 'linux' ]] ; then
+    if [ ! -d /tmp/.X11-unix ] ; then
+        echo "*** ERROR: Can't find X11 socket directory /tmp/.X11-unix" >&2
+        exit 1
+    fi
 fi
 
 #### Verify that a container for the image exists
@@ -99,12 +113,21 @@ if docker ps -a --format="{{.Image}}" | grep -q $IMAGE  ; then
 else
     echo "Creating docker container ${CONTAINER}"
     
-    docker create -ti --privileged -P $DOPTS \
-           -e "DISPLAY" \
-           -v "/tmp/.X11-unix/:/tmp/.X11-unix/:rw" \
-           --name $CONTAINER $IMAGE
+    if [[ $platform == 'linux' ]] ; then
+        echo "Linux detected. Running under X11."
+        docker create -ti --privileged -P $DOPTS \
+               -e "DISPLAY" \
+               -v "/tmp/.X11-unix/:/tmp/.X11-unix/:rw" \
+               --name $CONTAINER $IMAGE
+    elif [[ $platform == 'darwin' ]] ; then
+        echo "Darwin / OS X detected. Running under VNC."
+        docker create -ti --privileged -P $DOPTS \
+               -p 5901:5901 \
+               --entrypoint /home/genera/run-vnc.sh \
+               --name $CONTAINER $IMAGE
+    fi
 fi
 
 ### Start the container
 
-docker start -a $CONTAINER
+docker start -ai $CONTAINER
