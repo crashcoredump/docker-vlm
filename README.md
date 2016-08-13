@@ -1,4 +1,4 @@
-# About
+# ABOUT
 
 This is a Dockerized installation of Symbolics OpenGenera.
 
@@ -8,11 +8,25 @@ At the moment, this ONLY runs on Unix hosts, and does not support
 Docker or Docker-Machine running on OS X. I'm still working on getting
 that to work.
 
-# To Build
+# PREREQUISITES
+
+In order to run this image, you MUST be running a relatively recent
+version of Docker on a 64-bit Linux host.
+
+Additionally, the Linux host MUST have NFS support installed.  It is
+not actually used for NFS mounting, but if NFS support is not
+installed on the host, the kernel that Docker uses will not have NFS
+support either, and NFS support is critical to getting Open Genera
+running.
+
+If you get a message about NFS not being supported in the kernel, make
+sure you install nfs-kernel-server on your host.
+
+# BUILDING
 
     docker build -t docker-vlm .
 
-# To Run
+# RUNNING
 
 To run the VLM under Docker, please use the included `dvlm` utility.
 
