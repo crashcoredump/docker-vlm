@@ -7,35 +7,35 @@
 # This script is meant to be a wrapper around running
 # Symbolics VLM under Docker.
 #
-# All arguments are optional. By default, running ./dvlm with
-# no arguments will run a usable Genera instance mapped entirely
-# onto the Docker container.
+# See 'dvlm -h' for help.
 #
-#   -h             This help.
-#
-#   -s <dir>       Set LOCAL directory under which sys.sct
-#                  can be found. e.g. "-s /var/lib/symbolics"
-#                  If this argument is omitted, the default
-#                  bundled sys.sct files will be used.
-#
-#   -g <dir>       Set the LOCAL directory under which the X86-64
-#                  binary "genera" can be found. e.g.
-#                  "-g /path/to/dir/". If this argument is omitted,
-#                  the default bundled executable will be used
-#                  instead.
-#
-#   -l <dir>       Directory that contains world load files. If not
-#                  set, will use the bundled world load directory.
-#
-#   -w <image>     Full path to world vload file to use.
-#                  (e.g. "-w ~/worlds/Genera-8-5.vload")
-#
-#   -i <image>     Use the specified image. If not set, the
-#                  default name 'docker-vlm' will be used.
-#
-#   -c <container> Run the named container. If not set, the
-#                  default name 'docker-vlm' will be used.
 ################################################################
+
+function usage() {
+    cat <<end-of-message
+
+Usage: dvlm build [-s <dir>] [-g <dir>] [-w <file>]
+       dvlm run
+
+      -h         This help.
+
+      -s <dir>   Set directory under which sys.sct can be found.
+                 e.g. '-s /home/user/files' if sys.sct is under
+                 /home/user/files/sys.sct. If this argument is
+                 omitted, the default bundled sys.sct files will be
+                 used.
+
+      -g <file>  Set the path to an executable 'genera' on the local
+                 host. If this argument is omitted, the default bundled
+                 executable will be used instead.
+
+      -w <file>  Run genera with the specified world load file from the host.
+
+EXAMPLE:  dvlm build -s ~/sources/ -g ~/vlm/genera -w ~/worlds/Genera-8-5.vlod
+          dvlm run
+
+end-of-message
+}
 
 IMAGE="docker-vlm"
 CONTAINER="docker-vlm"
@@ -55,23 +55,18 @@ else
     exit 1
 fi
 
+CMD=$1; shift
+
 while getopts ":i:s:g:c:l:w:h" opt; do
     case $opt in
-        i)
-            echo "Will use Docker image $OPTARG"
-            IMAGE=$OPTARG
-            ;;
-        c)
-            echo "Will use Docker container $OPTARG"
-            CONTAINER=$OPTARG
-            ;;
         s)
             echo "Will use directory $OPTARG to find sys.sct"
             DOPTS="$DOPTS -v $OPTARG:/var/lib/symbolics:rw"
             ;;
         g)
-            echo "Will use directory $OPTARG to find genera binary"
-            DOPTS="$DOPTS -v $OPTARG:/home/genera/bin:rw"
+            dir=`dirname $OPTARG`
+            echo "Will use directory $dir to find genera binary"
+            DOPTS="$DOPTS -v $dir:/home/genera/bin:rw"
             ;;
         w)
             world=`basename $OPTARG`
@@ -81,25 +76,7 @@ while getopts ":i:s:g:c:l:w:h" opt; do
             WORLD=$world
             ;;
         h)
-            echo "Usage: dvlm [-i <image>] [-c <container>] [-s <dir>] [-g <dir>]"
-            echo
-            echo "-s <dir>       Set LOCAL directory under which sys.sct can be found."
-            echo "               e.g. '-s /var/lib/symbolics'. If this argument is"
-            echo "               omitted, the default bundled sys.sct files will be used."
-            echo
-            echo "-g <dir>       Set the LOCAL directory under which the X86-64 binary"
-            echo "               'genera' can be found. e.g. '-g /path/to/dir'. If this"
-            echo "               argument is omitted, the default bundled executable will"
-            echo "               be used instead."
-            echo
-            echo "-w <filename>  Run genera with the specified world load file from the host."
-            echo ""
-            echo "-i <image>     Use the specified Docker image name. Default is 'docker-vlm'"
-            echo
-            echo "-c <container> Run the named Docker container. Default is 'docker-vlm'"
-            echo
-            echo
-            echo "EXAMPLE:  dvlm -s ~/sources/ -g ~/vlm/ -w ~/worlds/Genera-8-5.vlod"
+            usage
             exit 1
             ;;
         \?)
@@ -120,34 +97,55 @@ if [[ $platform == 'linux' ]] ; then
     fi
 fi
 
-#### Verify that a container for the image exists
+function dobuild {
+    #### Verify that a container for the image exists
+    local dobuild=0
 
-if docker ps -a --format="{{.Image}}" | grep -q $IMAGE  ; then
-    echo "Found existing container for docker image ${IMAGE}"
-
-    if [ ! -z "$DOPTS" ] ; then
-        echo "WARNING: Ignoring -g, -s, and -w options: Container already exists." >&2
+    if docker ps -a --format="{{.Image}}" | grep -q $IMAGE  ; then
+        echo -n "WARNING: Container already exists. Overwrite? [y/n] "
+        read yn
+        if [ $yn = "y" ] ; then
+            docker kill docker-vlm > /dev/null 2>&1
+            docker rm docker-vlm > /dev/null 2>&1
+            dobuild=1
+        fi
+    else
+        dobuild=1
     fi
+
+    if [ $dobuild -eq 1 ] ; then
+        echo "Creating docker container ${CONTAINER}"
+
+        if [ $platform = 'linux' ] ; then
+             docker create -ti --privileged -P $DOPTS \
+                   -e "DISPLAY" \
+                   -e "WORLD=$WORLD" \
+                   -v "/tmp/.X11-unix/:/tmp/.X11-unix/:rw" \
+                   --name $CONTAINER $IMAGE
+        elif [ $platform = 'darwin' ] ; then
+              docker create -ti --privileged -P $DOPTS \
+                    -e "WORLD=$WORLD" \
+                    -p 5901:5901 \
+                    --entrypoint /home/genera/run-vnc.sh \
+                    --name $CONTAINER $IMAGE
+        fi
+    fi
+}
+
+function dorun() {
+    # Make sure an image exists
+    if docker ps -a --format="{{.Image}}" | grep -q $IMAGE  ; then
+        docker start -ai $CONTAINER
+    else
+        echo "No container found. Run 'dvlm build' first." >&2
+    fi
+}
+
+if [ "$CMD" = 'run' ] ; then
+    dorun
+elif [ "$CMD" = 'build' ] ; then
+    dobuild
 else
-    echo "Creating docker container ${CONTAINER}"
-
-    if [[ $platform == 'linux' ]] ; then
-        echo "Linux detected. Running under X11."
-        docker create -ti --privileged -P $DOPTS \
-               -e "DISPLAY" \
-               -e "WORLD=$WORLD" \
-               -v "/tmp/.X11-unix/:/tmp/.X11-unix/:rw" \
-               --name $CONTAINER $IMAGE
-    elif [[ $platform == 'darwin' ]] ; then
-        echo "Darwin / OS X detected. Running under VNC."
-        docker create -ti --privileged -P $DOPTS \
-               -e "WORLD=$WORLD" \
-               -p 5901:5901 \
-               --entrypoint /home/genera/run-vnc.sh \
-               --name $CONTAINER $IMAGE 
-    fi
+    usage
+    exit 1
 fi
-
-### Start the container
-
-docker start -ai $CONTAINER
