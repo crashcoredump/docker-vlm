@@ -2,6 +2,7 @@ genera.network: tap0:INTERNET|192.168.2.2;gateway=192.168.2.1
 
 genera.virtualMemory: 512
 genera.trace: no
+genera.worldSearchPath: /home/genera/worlds
 *main.geometry: 1280x1024+0+0
 *main.foreground: black
 *main.background: white
@@ -11,7 +12,6 @@ genera.trace: no
 *coldLoad.foreground: black
 *coldLoad.background: white
 
-genera.world: /home/genera/worlds/Genera-8-5-A.vlod
 genera.spy: no
 
 genera.debugger: VLM_debugger

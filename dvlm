@@ -27,8 +27,8 @@
 #   -l <dir>       Directory that contains world load files. If not
 #                  set, will use the bundled world load directory.
 #
-#   -w <dir>       Name of the World load file to use. If not set,
-#                  will use the included Genera-8-5-A.vlod.
+#   -w <image>     Full path to world vload file to use.
+#                  (e.g. "-w ~/worlds/Genera-8-5.vload")
 #
 #   -i <image>     Use the specified image. If not set, the
 #                  default name 'docker-vlm' will be used.
@@ -40,9 +40,8 @@
 IMAGE="docker-vlm"
 CONTAINER="docker-vlm"
 SYSSCT=
-GENERA=
 DOPTS=
-ROPTS=
+WORLD=Genera-8-5-A.vlod
 OS='unknown'
 
 unamestr=`uname`
@@ -73,15 +72,13 @@ while getopts ":i:s:g:c:l:w:h" opt; do
         g)
             echo "Will use directory $OPTARG to find genera binary"
             DOPTS="$DOPTS -v $OPTARG:/home/genera/bin:rw"
-            GENERA=$OPTARG
             ;;
         w)
-            echo "Will use vload named $OPTARG"
-            ROPTS="$ROPTS -w $OPTARG"
-            ;;
-        l)
-            echo "Will use load directory $OPTARG"
-            DOPTS="$DOPTS -v $OPTARG:/home/genera/worlds:rw"
+            world=`basename $OPTARG`
+            dir=`dirname $OPTARG`
+            echo "Will use vload named $world from directory $dir"
+            DOPTS="$DOPTS -v $dir:/home/genera/worlds:rw"
+            WORLD=$world
             ;;
         h)
             echo "Usage: dvlm [-i <image>] [-c <container>] [-s <dir>] [-g <dir>]"
@@ -95,17 +92,14 @@ while getopts ":i:s:g:c:l:w:h" opt; do
             echo "               argument is omitted, the default bundled executable will"
             echo "               be used instead."
             echo
-            echo "-l <dir>       Load worlds from the specified directory."
-            echo
-            echo "-w <filename>  Run genera with the specified world load file."
+            echo "-w <filename>  Run genera with the specified world load file from the host."
             echo ""
             echo "-i <image>     Use the specified Docker image name. Default is 'docker-vlm'"
             echo
             echo "-c <container> Run the named Docker container. Default is 'docker-vlm'"
             echo
             echo
-            echo "EXAMPLE:  dvlm -s /home/user/sources -g /home/user/vlm \\"
-            echo "               -l /home/user/worlds -w Genera-8-5.vlod"
+            echo "EXAMPLE:  dvlm -s ~/sources/ -g ~/vlm/ -w ~/worlds/Genera-8-5.vlod"
             exit 1
             ;;
         \?)
@@ -132,7 +126,7 @@ if docker ps -a --format="{{.Image}}" | grep -q $IMAGE  ; then
     echo "Found existing container for docker image ${IMAGE}"
 
     if [ ! -z "$DOPTS" ] ; then
-        echo "WARNING: Ignoring -g and -s options, container already exists." >&2
+        echo "WARNING: Ignoring -g, -s, and -w options: Container already exists." >&2
     fi
 else
     echo "Creating docker container ${CONTAINER}"
@@ -141,18 +135,19 @@ else
         echo "Linux detected. Running under X11."
         docker create -ti --privileged -P $DOPTS \
                -e "DISPLAY" \
+               -e "WORLD=$WORLD" \
                -v "/tmp/.X11-unix/:/tmp/.X11-unix/:rw" \
-               --name $CONTAINER $IMAGE $ROPTS
+               --name $CONTAINER $IMAGE
     elif [[ $platform == 'darwin' ]] ; then
         echo "Darwin / OS X detected. Running under VNC."
         docker create -ti --privileged -P $DOPTS \
+               -e "WORLD=$WORLD" \
                -p 5901:5901 \
                --entrypoint /home/genera/run-vnc.sh \
-               --name $CONTAINER $IMAGE $ROPTS
+               --name $CONTAINER $IMAGE 
     fi
 fi
 
 ### Start the container
 
-echo "RUNNING: docker start -ai $CONTAINER $ROPTS"
 docker start -ai $CONTAINER
